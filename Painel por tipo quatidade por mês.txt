@@ -1,0 +1,9 @@
+Painel por tipo quatidade por mês
+
+Painel filtro por assunto
+
+filtar graficos por regional
+
+paineil com as  regionais e assuntos mais solicitados
+
+count group by faixa etaria
