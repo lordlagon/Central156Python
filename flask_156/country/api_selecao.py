@@ -75,6 +75,7 @@ class AssuntoList(Resource):
     @api.doc('list_assuntos')
     @api.marshal_list_with(assunto)
     def get(self):
+        ASSUNTOS.clear()
         query = "select fk_assunto, assunto from olap_156.dim_assunto where assunto is not null"
         df = pd.read_sql(query, mydb)
         result = df.to_json(orient="records")
@@ -88,6 +89,7 @@ class AssuntoList(Resource):
     @api.doc('list_bairros')
     @api.marshal_list_with(bairro)
     def get(self):
+        BAIRROS.clear()
         query = "select fk_bairro, bairro from olap_156.dim_bairro2 where bairro is not null;"
         df = pd.read_sql(query, mydb)
         result = df.to_json(orient="records")
@@ -101,6 +103,7 @@ class AssuntoList(Resource):
     @api.doc('list_data')
     @api.marshal_list_with(data)
     def get(self):
+        DATAS.clear()
         query = "select fk_data, datacompleta, ano, diasemana, mes, trimestre, semestre from olap_156.dim_data where DataCompleta is not null"
         df = pd.read_sql(query, mydb)
         result = df.to_json(orient="records")
@@ -114,10 +117,10 @@ class FaixaEtariaList(Resource):
     @api.doc('list_faixa_etaria')
     @api.marshal_list_with(faixa_etaria)
     def get(self):
+        FAIXAS_ETARIAS.clear()
         query = "select fk_faixa_etaria_ibge, faixa_etaria FROM olap_156.dim_faixa_etaria_ibge where faixa_etaria is not null;"
         df = pd.read_sql(query, mydb)
         result = df.to_json(orient="records")
-        print(result)
         parsed = json.loads(result)
         for item in parsed:
             FAIXAS_ETARIAS.append(item)
@@ -128,10 +131,10 @@ class GeneroList(Resource):
     @api.doc('list_generos')
     @api.marshal_list_with(genero)
     def get(self):
+        GENEROS.clear()
         query = "select fk_genero, genero from olap_156.dim_genero where genero is not null"
         df = pd.read_sql(query, mydb)
         result = df.to_json(orient="records")
-        print(result)
         parsed = json.loads(result)
         for item in parsed:
             GENEROS.append(item)
@@ -142,10 +145,10 @@ class RegionalList(Resource):
     @api.doc('list_regionais')
     @api.marshal_list_with(regional)
     def get(self):
+        REGIONAIS.clear()
         query = "select fk_regional, regional from olap_156.dim_regional where regional is not null"
         df = pd.read_sql(query, mydb)
         result = df.to_json(orient="records")
-        print(result)
         parsed = json.loads(result)
         for item in parsed:
             REGIONAIS.append(item)
@@ -156,10 +159,10 @@ class SubdivisaoList(Resource):
     @api.doc('list_subdivisao')
     @api.marshal_list_with(subdivisao)
     def get(self):
+        SUBDIVISOES.clear()
         query = "select fk_subdivisao, subdivisao from olap_156.dim_subdivisao2 where subdivisao is not null"
         df = pd.read_sql(query, mydb)
         result = df.to_json(orient="records")
-        print(result)
         parsed = json.loads(result)
         for item in parsed:
             SUBDIVISOES.append(item)
@@ -170,10 +173,10 @@ class TipoList(Resource):
     @api.doc('list_types')
     @api.marshal_list_with(tipo)
     def get(self):
+        TIPOS.clear()
         query = "select fk_tipo, tipo from olap_156.dim_tipo where tipo is not null"
         df = pd.read_sql(query, mydb)
         result = df.to_json(orient="records")
-        
         parsed = json.loads(result)
         for item in parsed:
             TIPOS.append(item)

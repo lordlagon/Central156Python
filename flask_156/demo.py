@@ -1,4 +1,4 @@
-from typing import List
+
 import mysql.connector
 import pandas as pd
 import json

@@ -1,8 +1,8 @@
+from flask_restx import Namespace, Resource, fields
+
 import mysql.connector
-from numpy import number
 import pandas as pd
 import json
-from flask_restx import Namespace, Resource, fields
 
 # Conexão Mysql
 mydb = mysql.connector.connect(
@@ -14,6 +14,10 @@ mydb = mysql.connector.connect(
 )
 
 api = Namespace('analises', description='Api das analises da central 156')
+
+class Helpers:
+    def get_ano(consulta):
+        return consulta.get('ano')
 
 consulta = api.model('consulta', {
     'tipo': fields.String(required=True, description='nome do Tipo'),
@@ -45,16 +49,18 @@ class ConsultaList(Resource):
                 if item['tipo'] is not None:
                     QUANTIDADES.append(item)
 
-        QUANTIDADES.sort(key=get_ano)
+        QUANTIDADES.sort(key=Helpers.get_ano)
         return QUANTIDADES
 
-def get_ano(consulta):
-    return consulta.get('ano')
+
 
 
 countAno = api.model('countano', {
+    'tipo': fields.String(description='nome do Tipo'),
+    'mes': fields.String(description='Mês das solicitações'),
     'ano': fields.Integer(),
     'count': fields.Integer()
+
 })
 COUNTANOS = []
 
@@ -67,20 +73,55 @@ class ConsultaCountAno(Resource):
     @api.marshal_list_with(countAno)
     def get(self, tipo, mes):
         print(tipo, mes)
-        COUNTANOS.clear
+        COUNTANOS.clear()
         query = "SELECT T.FK_tipo, mes, ano FROM olap_156.fato_central156 C inner join dim_tipo T inner join dim_Data D where C.FK_Tipo = T.FK_Tipo and C.FK_Data = D.FK_Data and T.FK_Tipo = {}".format(tipo)
         df = pd.read_sql(query, mydb)
         for ano in anos:
-            rdf = df.loc[(df['mes']=='Jan') & (df['FK_tipo'] == 5) & (df['ano']==ano)]
+            options = [mes]
+            rdf = df.loc[(df['mes'].isin(options)) & (df['ano']==ano)]
             result = rdf.to_json(orient="records")
-            #print(result)
             parsed = json.loads(result)
             count = len(parsed)
-            print(count)
-            countAno = {'ano': ano, 'count': count}
+            countAno = {'ano': ano, 'count': count, 'tipo': tipo, 'mes': mes}
             print(countAno)
             COUNTANOS.append(countAno)
-        COUNTANOS.sort(key=get_ano)
+        COUNTANOS.sort(key=Helpers.get_ano)
         return COUNTANOS
         
+varSolicitacaoMes = api.model('varsolicitacaomes', {
+    'tipo': fields.String(description='nome do Tipo'),
+    'mes': fields.String(description='Mês das solicitações'),
+    'ano': fields.Integer(),
+    'dataCompleta': fields.DateTime(),
+    'count': fields.Integer()
+
+})
+SOLICITACOESMES = []
+meses = { "Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez" }
+@api.route('/varsolicitacaomes')
+
+class GetVarSolicitacaoMes(Resource):
+    @api.doc('list_varSolicitacaoMes')
+    @api.marshal_list_with(varSolicitacaoMes)
+    def get(self):
+        # if (len(SOLICITACOESMES) > 0):
+        #     return SOLICITACOESMES
+        query = "SELECT T.fk_tipo, tipo, mes, ano, datacompleta FROM olap_156.fato_central156 C inner join dim_tipo T inner join dim_Data D where C.FK_Tipo = T.FK_Tipo and C.FK_Data = D.FK_Data"
+        df = pd.read_sql(query, mydb)
+        for ano in anos:
+            for mes in meses:
+                rdf = df.loc[(df['mes'] == mes) & (df['ano']==ano)]
+                
+                print(mes, ano)
+                print(rdf)
+
+        #     rdf = df.loc[(df['mes'].isin(meses)) & (df['ano']==ano)]
+        #     result = rdf.to_json(orient="records")
+        #     parsed = json.loads(result)
+        #     count = len(parsed)
+        #     varSolicitacaoMes = {'ano': ano, 'count': count, 'tipo': tipo, 'mes': mes}
+        #     print(varSolicitacaoMes)
+        #     SOLICITACOESMES.append(varSolicitacaoMes)
+        # SOLICITACOESMES.sort(key=Helpers.get_ano)
+        return SOLICITACOESMES
 
