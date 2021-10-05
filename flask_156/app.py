@@ -1,7 +1,7 @@
 from flask import Flask
 from werkzeug.middleware.proxy_fix import ProxyFix
 
-from country import api
+from controllers import api
 
 app = Flask(__name__)
 app.wsgi_app = ProxyFix(app.wsgi_app)
