@@ -128,10 +128,8 @@ TOP10ASSUNTOS = []
 
 topAssuntos = api.model('topassuntos', {
     'assunto': fields.String(description='nome do Assunto'),
-    'subdivisao': fields.String(description='Mês das subdivisao'),
     'ano': fields.Integer(),
     'count': fields.Integer()
-
 })
 
 @api.route('/topassuntos')
@@ -140,9 +138,9 @@ class GetTopAssuntos(Resource):
     @api.marshal_list_with(topAssuntos)
     def get(self):
         TOP10ASSUNTOS = []
-        query = "SELECT assunto, subdivisao, mes, ano FROM olap_156.fato_central156 C inner join dim_assunto A inner join dim_subdivisao2 S inner join dim_Data D where S.Fk_subdivisao= C.fk_subdivisao and C.FK_Assunto = A.FK_Assunto and C.FK_Data = D.FK_Data"
+        query = "SELECT assunto, mes, ano FROM olap_156.fato_central156 C inner join dim_assunto A inner join dim_Data D where C.FK_Assunto = A.FK_Assunto and C.FK_Data = D.FK_Data"
         df = pd.read_sql(query, mydb)
-        gdf = df.groupby(['assunto','subdivisao','ano']).size().reset_index(name='count')
+        gdf = df.groupby(['assunto','ano']).size().reset_index(name='count')
         mdf = gdf.sort_values(by='count', ascending=False).head(10)
         print(mdf)
         result = mdf.to_json(orient="records")

@@ -6,6 +6,7 @@ api = Api(
     version='1.0', 
     title='Central156 API',
     description='Api para o TCC Statistics 156',
+    doc='/Docs'
 )
 
 api.add_namespace(analises_api)
